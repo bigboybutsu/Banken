@@ -9,7 +9,7 @@ förklaring. T.ex. createAccount gör exakt vad nämnet säger osv.
 import { submitForm, allAccounts, loginContent } from "./divHelpers.js";
 
 const main = document.querySelector("main");
-const host = "http://localhost:3011";
+const host = "";
 
 const loginScreenBtn = document.querySelector("#log-in");
 const createPost = document.querySelector("#create-post");

@@ -3,6 +3,7 @@ import { MongoClient, ObjectId } from "mongodb";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
 
 import cors from "cors";
 
@@ -26,7 +27,10 @@ app.use(
   })
 );
 
-const client = new MongoClient("mongodb://localhost:27017");
+dotenv.config();
+const MONGO_URI = process.env.MONGO_URI;
+
+const client = new MongoClient(MONGO_URI);
 await client.connect();
 
 const db = client.db("bank");
@@ -97,19 +101,27 @@ app.get("/api/accounts", async (req, res) => {
 
 /* UPDATE BALANCE */
 app.post("/api/accounts/balance", async (req, res) => {
-  const user = await accountCollection.findOne({ _id: new ObjectId(req.body._id) });
+  const user = await accountCollection.findOne({
+    _id: new ObjectId(req.body._id),
+  });
   let oldBalance = parseInt(user.balance);
   if (req.body.deposit === true) {
     let newBalance = (oldBalance + parseInt(req.body.balance)).toString();
     user.balance = newBalance;
-    const updatedUser = await accountCollection.updateOne({ _id: new ObjectId(req.body._id) }, { $set: user });
+    const updatedUser = await accountCollection.updateOne(
+      { _id: new ObjectId(req.body._id) },
+      { $set: user }
+    );
     res.json(updatedUser);
   } else {
     let newBalance = oldBalance - parseInt(req.body.balance);
     if (newBalance >= 0) {
       newBalance = newBalance.toString();
       user.balance = newBalance;
-      const updatedUser = await accountCollection.updateOne({ _id: new ObjectId(req.body._id) }, { $set: user });
+      const updatedUser = await accountCollection.updateOne(
+        { _id: new ObjectId(req.body._id) },
+        { $set: user }
+      );
       res.json(updatedUser);
     } else {
       res.json({ badValue: true });
@@ -125,7 +137,10 @@ app.post("/api/accounts", async (req, res) => {
 
 /* UPDATE ONE ACCOUNT */
 app.post("/api/accounts/:id", async (req, res) => {
-  const updated = await accountCollection.updateOne({ id: parseInt(req.params.id) }, { $set: req.body });
+  const updated = await accountCollection.updateOne(
+    { id: parseInt(req.params.id) },
+    { $set: req.body }
+  );
   if (updated) {
     res.send(updated);
   } else if (updated === null) {
@@ -135,7 +150,9 @@ app.post("/api/accounts/:id", async (req, res) => {
 
 /* DELETE ONE ACCOUNT */
 app.delete("/api/accounts/:id", async (req, res) => {
-  const deleted = await accountCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+  const deleted = await accountCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+  });
 
   if (deleted) {
     res.send(deleted);
